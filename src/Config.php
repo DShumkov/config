@@ -1,36 +1,31 @@
 <?php namespace DShumkov\Config;
 
-class Config
+class Config extends Registry
 {
-    public function __construct($path, $env = null)
+    public static function init($path, $env = null)
     {
         if (null !== $env)
         {
             $path .= '/'.$env;
         }
 
-        $this->loadDirectory($path);
+        self::loadDirectory($path);
 
     }
 
-    public function get($name)
-    {
-        return $this->values[$name];
-    }
-
-    private function loadFile($fileName)
+    private static function loadFile($fileName)
     {
         return require $fileName;
     }
 
-    private function flatter($some_array, $prepend = '')
+    private static function flatter($some_array, $prepend = '')
     {
         $result = [];
         foreach ($some_array as $key => $value)
         {
             if (is_array($value))
             {
-                $result = array_merge($result, $this->flatter($value, $prepend.$key.'.'));
+                $result = array_merge($result, self::flatter($value, $prepend.$key.'.'));
             }
             else
             {
@@ -40,15 +35,10 @@ class Config
         return $result;
     }
 
-    public function set($key, $value)
-    {
-        $this->values[$key] = $value;
-    }
-
     /**
      * @param $path
      */
-    private function loadDirectory($path)
+    private static function loadDirectory($path)
     {
         $iterator = new \FilesystemIterator($path);
         $files = new \RegexIterator($iterator, '/\.php$/');
@@ -58,10 +48,10 @@ class Config
             if (is_dir($file->getPathname())) {
                 continue;
             }
-            $config[$file->getBaseName('.php')] = $this->loadFile($file->getPathname());
+            $config[$file->getBaseName('.php')] = self::loadFile($file->getPathname());
         }
 
-        $this->values = $this->flatter($config);
+        self::$values = self::flatter($config);
     }
 
 }
