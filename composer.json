@@ -1,0 +1,17 @@
+{
+    "name": "dshumkov/config",
+    "description": "Configuration files support",
+    "authors": [
+        {
+            "name": "Dmitry Shumkov",
+            "email": "dmitry.shumkov@saatchi.co.nz"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "DShumkov\\Config\\": "src/"
+        }
+    }
+}
