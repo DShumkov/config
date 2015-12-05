@@ -1,6 +1,5 @@
 <?php namespace DShumkov\Config;
 
-
 abstract class Registry
 {
     protected static $values = [];
