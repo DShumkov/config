@@ -1,44 +1,62 @@
 <?php namespace DShumkov\Config;
 
-class Config extends Registry
+class Config implements Registry
 {
-    public static function init($path, $env = null)
+    protected $values = [];
+
+    public function get($name)
     {
+        return $this->values[$name];
+    }
+
+    public function set($key, $value)
+    {
+        $this->values[$key] = $value;
+    }
+
+    public function getAll()
+    {
+        return $this->values;
+    }
+
+    public function __construct($path, $env = null)
+    {
+        $this->loadDirectory($path);
+
         if (null !== $env)
         {
-            $path .= '/'.$env;
+            $this->loadDirectory($path . '/'.$env);
         }
-
-        self::loadDirectory($path);
 
     }
 
-    private static function loadFile($fileName)
+    private function loadFile($fileName)
     {
         return require $fileName;
     }
 
-    private static function flatter($some_array, $prepend = '')
+    private function flatter($some_array, $prepend = '')
     {
         $result = [];
         foreach ($some_array as $key => $value)
         {
             if (is_array($value))
             {
-                $result = array_merge($result, self::flatter($value, $prepend.$key.'.'));
+                $result = array_merge($result, $this->flatter($value, $prepend.$key.'.'));
             }
             else
             {
                 $result[$prepend.$key] = $value;
             }
         }
+
         return $result;
     }
 
     /**
      * @param $path
      */
-    private static function loadDirectory($path)
+    private function loadDirectory($path)
     {
         $iterator = new \FilesystemIterator($path);
         $files = new \RegexIterator($iterator, '/\.php$/');
@@ -48,10 +66,10 @@ class Config extends Registry
             if (is_dir($file->getPathname())) {
                 continue;
             }
-            $config[$file->getBaseName('.php')] = self::loadFile($file->getPathname());
+            $config[$file->getBaseName('.php')] = $this->loadFile($file->getPathname());
         }
 
-        self::$values = self::flatter($config);
+        $this->values = array_merge($this->values, $this->flatter($config)) ;
     }
 
 }
